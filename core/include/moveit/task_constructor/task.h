@@ -43,6 +43,7 @@
 
 #include <moveit/task_constructor/introspection.h>
 #include <moveit_task_constructor_msgs/msg/solution.hpp>
+#include <moveit_task_constructor_msgs/action/execute_task_solution.hpp>
 
 #include <moveit/macros/class_forward.hpp>
 
@@ -50,6 +51,7 @@
 #include <moveit/utils/moveit_error_code.hpp>
 
 #include <rclcpp/node.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 
 namespace moveit {
 namespace core {
@@ -139,7 +141,7 @@ public:
 	void printState(std::ostream& os = std::cout) const;
 
 	/// print an explanation for a planning failure to os
-	void explainFailure(std::ostream& os = std::cout) const override;
+	bool explainFailure(std::ostream& os = std::cout) const override;
 
 	size_t numSolutions() const { return solutions().size(); }
 	const ordered<SolutionBaseConstPtr>& solutions() const { return stages()->solutions(); }
@@ -167,6 +169,9 @@ protected:
 
 private:
 	using WrapperBase::init;
+	// persistent node and client to call the ExecuteTaskSolution action and is only created if execute() is called
+	rclcpp::Node::SharedPtr execute_solution_node_;
+	std::shared_ptr<rclcpp_action::Client<moveit_task_constructor_msgs::action::ExecuteTaskSolution>> execute_ac_;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Task& task) {
